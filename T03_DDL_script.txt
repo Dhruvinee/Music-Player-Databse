@@ -1,0 +1,220 @@
+Group 3 DBMS
+Music Player System
+
+CREATE SCHEMA MUSIC_PLAYER_SYSTEM;
+SET SEARCH_PATH TO MUSIC_PLAYER_SYSTEM;
+CREATE TABLE Users (
+    Login_id VARCHAR(20) PRIMARY KEY,
+    User_name VARCHAR(20) NOT NULL,
+    Password VARCHAR(20) NOT NULL,
+    Date_of_birth DATE,
+    Number VARCHAR(10),
+    email VARCHAR(50)
+);
+
+CREATE TABLE Artists (
+    Artist_id VARCHAR(20) PRIMARY KEY,
+    Type VARCHAR(20) NOT NULL,
+    Description VARCHAR(100),
+    FOREIGN KEY (Artist_id) REFERENCES Users(Login_id) ON DELETE CASCADE ON UPDATE CASCADE
+);
+
+CREATE TABLE Listeners (
+    Listener_id VARCHAR(20) PRIMARY KEY,
+    FOREIGN KEY (Listener_id) REFERENCES Users(Login_id) ON DELETE CASCADE ON UPDATE CASCADE
+);
+
+CREATE TABLE Genre (
+    Genre_id VARCHAR(20) PRIMARY KEY,
+    Genre_name VARCHAR(20)
+);
+
+CREATE TABLE Songs (
+    Song_id VARCHAR(20) PRIMARY KEY,
+    Song_name VARCHAR(50) NOT NULL,
+    Duration TIME,
+    Lyrics VARCHAR(100),
+    Date_of_release DATE,
+    Genre_id VARCHAR(20),
+    Language VARCHAR(20),
+    FOREIGN KEY (Genre_id) REFERENCES Genre(Genre_id) ON DELETE CASCADE ON UPDATE CASCADE
+);
+
+CREATE TABLE Song_Artists (
+    Song_id VARCHAR(20),
+    Artist_id VARCHAR(20),
+    PRIMARY KEY (Song_id, Artist_id),
+    FOREIGN KEY (Song_id) REFERENCES Songs(Song_id) ON DELETE CASCADE ON UPDATE CASCADE,
+    FOREIGN KEY (Artist_id) REFERENCES Artists(Artist_id) ON DELETE CASCADE ON UPDATE CASCADE
+);
+
+
+CREATE TABLE Playlist (
+    Playlist_id VARCHAR(20) PRIMARY KEY,
+    Playlist_name VARCHAR(50),
+    Date DATE
+);
+CREATE TABLE Playlist_Made_by(
+    Playlist_id VARCHAR(20),
+    User_id VARCHAR(20),
+    PRIMARY KEY(Playlist_id,User_id),
+    FOREIGN KEY (User_id) REFERENCES Listeners(Listener_id) ON DELETE CASCADE ON UPDATE CASCADE, 
+    FOREIGN KEY (Playlist_id) REFERENCES Playlist(Playlist_id) ON DELETE CASCADE ON UPDATE CASCADE
+);
+
+CREATE TABLE Playlist_Song(
+    Song_id VARCHAR(20),
+    Playlist_id VARCHAR(20),
+    PRIMARY KEY(Song_id,Playlist_id),
+    FOREIGN KEY (Song_id) REFERENCES Songs(Song_id) ON DELETE CASCADE ON UPDATE CASCADE,
+    FOREIGN KEY (Playlist_id) REFERENCES Playlist(Playlist_id) ON DELETE CASCADE ON UPDATE CASCADE
+);
+
+CREATE TABLE Playlist_Following (
+    Playlist_id VARCHAR(20),
+    Follower_id VARCHAR(20),
+    PRIMARY KEY (Playlist_id, Follower_id),
+    FOREIGN KEY (Follower_id) REFERENCES Listeners(Listener_id) ON DELETE CASCADE ON UPDATE CASCADE,
+    FOREIGN KEY (Playlist_id) REFERENCES Playlist(Playlist_id) ON DELETE CASCADE ON UPDATE CASCADE
+);
+
+CREATE TABLE Follow_details (
+    Artist_id VARCHAR(20),
+    Listener_id VARCHAR(20),
+    PRIMARY KEY (Artist_id, Listener_id),
+    FOREIGN KEY (Artist_id) REFERENCES Artists(Artist_id) ON DELETE CASCADE ON UPDATE CASCADE,
+    FOREIGN KEY (Listener_id) REFERENCES Listeners(Listener_id) ON DELETE CASCADE ON UPDATE CASCADE
+);
+
+CREATE TABLE Album (
+    Album_name VARCHAR(50),
+    Song_id VARCHAR(20),
+    Date DATE,
+    Artist_id VARCHAR(20),
+    PRIMARY KEY (Album_name, Artist_id, Song_id),
+    FOREIGN KEY (Artist_id) REFERENCES Artists(Artist_id) ON DELETE CASCADE ON UPDATE CASCADE,
+    FOREIGN KEY (Song_id) REFERENCES Songs(Song_id) ON DELETE CASCADE ON UPDATE CASCADE
+);
+
+CREATE TABLE Podcast (
+    Podcast_id VARCHAR(20) PRIMARY KEY,
+    Podcast_name VARCHAR(50) NOT NULL,
+    Date_of_release DATE,
+    Duration TIME,
+    Description VARCHAR(200),
+    Language VARCHAR(20)
+);
+
+CREATE TABLE Podcast_Creator (
+    Podcast_id VARCHAR(20) ,
+    Creator_id VARCHAR(20) ,
+    PRIMARY KEY (Podcast_id, Creator_id),
+    FOREIGN KEY (Creator_id) REFERENCES Artists(Artist_id) ON DELETE CASCADE ON UPDATE CASCADE
+);
+
+
+CREATE TABLE Podcast_episode (
+    Podcast_id VARCHAR(20),
+    Episode_number INT ,
+    Episode_Name VARCHAR(20),
+    Date_of_release DATE,
+    Duration TIME,
+    Description VARCHAR(200),
+    PRIMARY KEY (Podcast_id, Episode_number),
+    FOREIGN KEY (Podcast_id) REFERENCES Podcast(Podcast_id) ON DELETE CASCADE ON UPDATE CASCADE
+    
+);
+
+CREATE TABLE Subscription (
+    Sub_id VARCHAR(20) PRIMARY KEY,
+    Plan_type VARCHAR(20) NOT NULL,
+    Duration INTERVAL NOT NULL,
+    Amount INT NOT NULL
+);
+
+CREATE TABLE Payment (
+    Payment_id VARCHAR(20) PRIMARY KEY,
+    User_id VARCHAR(20) NOT NULL,
+    Method VARCHAR(20) NOT NULL,
+    Paid_amount INT NOT NULL,
+    Type VARCHAR(20) NOT NULL,
+    FOREIGN KEY (User_id) REFERENCES Users(Login_id) ON DELETE CASCADE ON UPDATE CASCADE
+);
+
+CREATE TABLE Taken_Subscription (
+    User_id VARCHAR(20),
+    Sub_id VARCHAR(20) ,
+    Start_date DATE ,
+    PRIMARY KEY (User_id, Start_date,Sub_id),
+    FOREIGN KEY (User_id) REFERENCES Listeners(Listener_id) ON DELETE CASCADE ON UPDATE CASCADE,
+    FOREIGN KEY (Sub_id) REFERENCES Subscription(Sub_id) ON DELETE CASCADE ON UPDATE CASCADE
+);
+
+CREATE TABLE Liked_songs_details (
+    User_id VARCHAR(20),
+    Song_id VARCHAR(20),
+    PRIMARY KEY (User_id, Song_id),
+    FOREIGN KEY (User_id) REFERENCES Listeners(Listener_id) ON DELETE CASCADE ON UPDATE CASCADE,
+    FOREIGN KEY (Song_id) REFERENCES Songs(Song_id) ON DELETE CASCADE ON UPDATE CASCADE
+);
+
+CREATE TABLE Followed_Podcast_details (
+    User_id VARCHAR(20),
+    Podcast_id VARCHAR(20),
+    PRIMARY KEY (User_id, Podcast_id),
+    FOREIGN KEY (User_id) REFERENCES Listeners(Listener_id) ON DELETE CASCADE ON UPDATE CASCADE,
+    FOREIGN KEY (Podcast_id) REFERENCES Podcast(Podcast_id) ON DELETE CASCADE ON UPDATE CASCADE
+);
+
+CREATE TABLE Events (
+    Creator_id VARCHAR(20),
+    Event_id VARCHAR(20),
+    Date_of_event DATE NOT NULL,
+    Time_of_event TIME NOT NULL,
+    Location VARCHAR(20) NOT NULL,
+    Description VARCHAR(100),
+    Buy_ticket_link VARCHAR(100),
+    PRIMARY KEY (Creator_id, Event_id),
+    FOREIGN KEY (Creator_id) REFERENCES Artists(Artist_id) ON DELETE CASCADE ON UPDATE CASCADE
+);
+
+CREATE TABLE Podcast_Listening_History (
+    User_id VARCHAR(20),
+    Podcast_id VARCHAR(20),
+    Month VARCHAR(20),
+    Episode_number INT,
+    Play_count INT NOT NULL,
+    PRIMARY KEY (User_id, Podcast_id, Month, Episode_number),
+    FOREIGN KEY (User_id) REFERENCES Listeners(Listener_id) ON DELETE CASCADE ON UPDATE CASCADE,
+    FOREIGN KEY (Podcast_id, Episode_number) REFERENCES Podcast_episode(Podcast_id, Episode_number) ON DELETE CASCADE ON UPDATE CASCADE
+);
+
+
+CREATE TABLE Song_Listening_History (
+    User_id VARCHAR(20),
+    Song_id VARCHAR(20),
+    Month VARCHAR(20),
+    Play_count INT NOT NULL,
+    PRIMARY KEY (User_id, Song_id, Month),
+    FOREIGN KEY (User_id) REFERENCES Listeners(Listener_id) ON DELETE CASCADE ON UPDATE CASCADE,
+    FOREIGN KEY (Song_id) REFERENCES Songs(Song_id) ON DELETE CASCADE ON UPDATE CASCADE
+);
+
+CREATE TABLE Artist_Earning (
+    Artist_id VARCHAR(20) NOT NULL,
+    Month VARCHAR(20) NOT NULL,
+    Method VARCHAR(50) NOT NULL,
+    Payment_id VARCHAR(20) PRIMARY KEY,
+    Amount INT NOT NULL,
+    Date_of_payment DATE NOT NULL,
+    FOREIGN KEY (Payment_id) REFERENCES Payment(Payment_id) ON DELETE CASCADE ON UPDATE CASCADE,
+    FOREIGN KEY (Artist_id) REFERENCES Artists(Artist_id) ON DELETE CASCADE ON UPDATE CASCADE
+);
+
+CREATE TABLE Favourite_Genre (
+    User_id VARCHAR(20),
+    Genre_id VARCHAR(20),
+    PRIMARY KEY (User_id, Genre_id),
+    FOREIGN KEY (Genre_id) REFERENCES Genre(Genre_id) ON DELETE CASCADE ON UPDATE CASCADE,
+    FOREIGN KEY (User_id) REFERENCES Listeners(Listener_id) ON DELETE CASCADE ON UPDATE CASCADE
+);
